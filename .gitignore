@@ -1,0 +1,10 @@
+**/node_modules
+**/.vs
+/.rpt2_cache
+lib
+coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+dist

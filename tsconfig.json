@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "allowJs": false,
+    "declaration": true,
+    "declarationMap": true,
+    "allowSyntheticDefaultImports": true
+  }
+}

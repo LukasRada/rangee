@@ -1,0 +1,27 @@
+name: Build Rangee
+run-name: 🏗️ ${{ github.event.head_commit.message }}
+on:
+  workflow_call:
+  push:
+    branches:
+      - "*"
+    tags-ignore:
+      - "*"
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install node and yarn
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "yarn"
+          cache-dependency-path: "yarn.lock"
+      - name: Install deps
+        run: yarn install --frozen-lockfile
+      - name: Check code formatting
+        run: yarn test:ci
+      - name: Run build script
+        run: yarn build
