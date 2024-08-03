@@ -21,7 +21,11 @@ jobs:
           cache-dependency-path: "yarn.lock"
       - name: Install deps
         run: yarn install --frozen-lockfile
-      - name: Check code formatting
+      - name: Run unit tests
         run: yarn test:ci
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
       - name: Run build script
         run: yarn build
