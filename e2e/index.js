@@ -188,58 +188,38 @@ exports.findNodeBySelector = findNodeBySelector;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateSelector = void 0;
-const childNodeIndexOf = (parentNode, childNode) => {
-    const childNodes = Array.from(parentNode.childNodes);
-    let result = 0;
-    for (let i = 0; i < childNodes.length; i++) {
-        if (childNodes[i] === childNode) {
-            result = i;
-            break;
-        }
-    }
-    return result;
-};
+const childNodeIndexOf = (parentNode, childNode) => Array.prototype.indexOf.call(parentNode.childNodes, childNode);
 const computedNthIndex = (childElement) => {
     let elementsWithSameTag = 0;
     const parent = childElement.parentElement;
     if (parent) {
-        for (let i = 0, l = parent.childNodes.length; i < l; i++) {
-            const currentHtmlElement = parent.childNodes[i];
-            if (currentHtmlElement === childElement) {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const currentChild of parent.children) {
+            if (currentChild.tagName === childElement.tagName) {
                 elementsWithSameTag++;
-                break;
             }
-            if (currentHtmlElement.tagName === childElement.tagName) {
-                elementsWithSameTag++;
+            if (currentChild === childElement) {
+                break;
             }
         }
     }
     return elementsWithSameTag;
 };
 const generateSelector = (node, relativeTo) => {
-    let currentNode = node;
+    var _a;
     const tagNames = [];
-    let textNodeIndex = 0;
-    if (node.parentNode) {
-        textNodeIndex = childNodeIndexOf(node.parentNode, node);
-        while (currentNode) {
-            const tagName = currentNode.tagName;
-            if (tagName) {
-                const nthIndex = computedNthIndex(currentNode);
-                let selector = tagName;
-                if (nthIndex > 1) {
-                    selector += `:nth-of-type(${nthIndex})`;
-                }
-                tagNames.push(selector);
-            }
-            currentNode = currentNode.parentElement;
-            if (currentNode === relativeTo.parentElement) {
-                break;
-            }
+    let currentNode = node;
+    const textNodeIndex = node.parentNode ? childNodeIndexOf(node.parentNode, node) : 0;
+    while (currentNode && currentNode !== relativeTo.parentElement) {
+        const tagName = (_a = currentNode.tagName) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+        if (tagName) {
+            const nthIndex = computedNthIndex(currentNode);
+            tagNames.push(nthIndex > 1 ? `${tagName}:nth-of-type(${nthIndex})` : tagName);
         }
+        currentNode = currentNode.parentElement;
     }
     return {
-        s: tagNames.reverse().join('>').toLowerCase(),
+        s: tagNames.reverse().join('>'),
         c: textNodeIndex,
         o: 0,
     };

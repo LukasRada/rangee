@@ -1,67 +1,43 @@
 import { HtmlElementSelectorResult } from '../types/HtmlElementSelectorResult';
 
-const childNodeIndexOf = (parentNode: Node, childNode: Node) => {
-    const childNodes = Array.from(parentNode.childNodes);
-    let result = 0;
-    for (let i = 0; i < childNodes.length; i++) {
-        if (childNodes[i] === childNode) {
-            result = i;
-            break;
-        }
-    }
-    return result;
-};
+const childNodeIndexOf = (parentNode: Node, childNode: Node): number => Array.prototype.indexOf.call(parentNode.childNodes, childNode);
 
-const computedNthIndex = (childElement: HTMLElement) => {
+const computedNthIndex = (childElement: HTMLElement): number => {
     let elementsWithSameTag = 0;
 
     const parent = childElement.parentElement;
 
     if (parent) {
-        for (let i = 0, l = parent.childNodes.length; i < l; i++) {
-            const currentHtmlElement = parent.childNodes[i] as HTMLElement;
-            if (currentHtmlElement === childElement) {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const currentChild of parent.children) {
+            if (currentChild.tagName === childElement.tagName) {
                 elementsWithSameTag++;
-                break;
             }
-            if (currentHtmlElement.tagName === childElement.tagName) {
-                elementsWithSameTag++;
+            if (currentChild === childElement) {
+                break;
             }
         }
     }
+
     return elementsWithSameTag;
 };
 
 export const generateSelector = (node: Node, relativeTo: Node): HtmlElementSelectorResult => {
-    let currentNode: HTMLElement | null = node as HTMLElement;
     const tagNames: string[] = [];
-    let textNodeIndex = 0;
-    if (node.parentNode) {
-        textNodeIndex = childNodeIndexOf(node.parentNode, node);
+    let currentNode: HTMLElement | null = node as HTMLElement;
+    const textNodeIndex = node.parentNode ? childNodeIndexOf(node.parentNode, node) : 0;
 
-        while (currentNode) {
-            const tagName = currentNode.tagName;
-
-            if (tagName) {
-                const nthIndex = computedNthIndex(currentNode);
-                let selector = tagName;
-
-                if (nthIndex > 1) {
-                    selector += `:nth-of-type(${nthIndex})`;
-                }
-
-                tagNames.push(selector);
-            }
-
-            currentNode = currentNode.parentElement;
-
-            if (currentNode === relativeTo.parentElement) {
-                break;
-            }
+    while (currentNode && currentNode !== relativeTo.parentElement) {
+        const tagName = currentNode.tagName?.toLowerCase();
+        if (tagName) {
+            const nthIndex = computedNthIndex(currentNode);
+            tagNames.push(nthIndex > 1 ? `${tagName}:nth-of-type(${nthIndex})` : tagName);
         }
+        currentNode = currentNode.parentElement;
     }
+
     return {
-        s: tagNames.reverse().join('>').toLowerCase(),
+        s: tagNames.reverse().join('>'),
         c: textNodeIndex,
         o: 0,
     };
