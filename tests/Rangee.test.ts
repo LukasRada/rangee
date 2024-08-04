@@ -47,6 +47,19 @@ describe("Rangee", () => {
     expect(deserializedAtomic[0].toString()).toStrictEqual("Example Domain");
   });
 
+  test("atomic serialize / atomic deserialize - single node exact", () => {
+    const basicHtml = `<html><body><div><h1>Example Domain</h1></div></body></html>`;
+    const dom = new JSDOM(basicHtml, { url: "http://localhost/" });
+    const range = dom.window.document.createRange();
+    const heading = dom.window.document.body.querySelector("h1")!;
+    range.setStart(heading, 0);
+    range.setEnd(heading, 0);
+    const rangee = new Rangee({ document: dom.window.document });
+    const result = rangee.serializeAtomic(range);
+    const deserializedAtomic = rangee.deserializeAtomic(result);
+    expect(deserializedAtomic[0].toString()).toStrictEqual("Example Domain");
+  });
+
   test("atomic serialize / atomic deserialize - multiple nodes", () => {
     const basicHtml = `<html><body><div><h1><span id="first">Example</span> <span id="second">Domain</span></h1></div></body></html>`;
     const dom = new JSDOM(basicHtml, { url: "http://localhost/" });

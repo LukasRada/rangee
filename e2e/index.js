@@ -63,8 +63,8 @@ class Rangee {
                 const first = range.startContainer.firstChild;
                 const last = range.startContainer.lastChild;
                 if (first === last) {
-                    atomicRange.setStart(first, first === range.startContainer ? range.startOffset : 0);
-                    atomicRange.setEnd(last, last === range.endContainer ? range.endOffset : last.length);
+                    atomicRange.setStart(first, 0);
+                    atomicRange.setEnd(last, last.length);
                     return [atomicRange];
                 }
             }
