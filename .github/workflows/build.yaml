@@ -29,3 +29,15 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Run build script
         run: yarn build
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: |
+          yarn build:e2e
+          npx playwright test
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

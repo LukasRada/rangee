@@ -32,15 +32,6 @@ yarn test
 
 ## E2E tests
 
-Terminal 1
-
-```
-cd e2e
-npx serve
-```
-
-Terminal 2
-
 ```
 yarn build:e2e
 npx playwright test
