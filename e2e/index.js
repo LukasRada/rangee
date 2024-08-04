@@ -15,14 +15,15 @@ class Rangee {
         this.onSerialization = (callback) => (this.serializationCallback = callback);
         this.onCompression = (callback) => (this.compressionCallback = callback);
         this.serializeAtomic = (range) => {
+            var _a, _b;
             const atomicRanges = this.createAtomicRanges(range);
             const serialized = atomicRanges
-                .map((range) => (0, serialize_1.serialize)(range.cloneRange(), this.options.document.body))
-                .map((serializedRange) => JSON.stringify(serializedRange))
-                .join("|");
-            this.serializationCallback && this.serializationCallback(serialized);
+                .map(range => (0, serialize_1.serialize)(range.cloneRange(), this.options.document.body))
+                .map(serializedRange => JSON.stringify(serializedRange))
+                .join('|');
+            (_a = this.serializationCallback) === null || _a === void 0 ? void 0 : _a.call(this, serialized);
             const compressed = (0, compress_1.compress)(serialized);
-            this.compressionCallback && this.compressionCallback(compressed);
+            (_b = this.compressionCallback) === null || _b === void 0 ? void 0 : _b.call(this, compressed);
             const encoded = (0, encode_1.encode)(compressed);
             return encoded;
         };
@@ -30,18 +31,18 @@ class Rangee {
             const decoded = (0, decode_1.decode)(representation);
             const decompressed = (0, decompress_1.decompress)(decoded);
             const serializedRanges = decompressed
-                .split("|")
-                .map((decompressedRangeRepresentation) => JSON.parse(decompressedRangeRepresentation))
-                .map((serializedRange) => (0, deserialize_1.deserialize)(serializedRange, this.options.document));
+                .split('|')
+                .map(decompressedRangeRepresentation => JSON.parse(decompressedRangeRepresentation))
+                .map(serializedRange => (0, deserialize_1.deserialize)(serializedRange, this.options.document));
             return serializedRanges;
         };
         this.serialize = (range) => {
+            var _a, _b;
             const serialized = (0, serialize_1.serialize)(range.cloneRange(), this.options.document.body);
             const serializedStringified = JSON.stringify(serialized);
-            this.serializationCallback &&
-                this.serializationCallback(serializedStringified);
+            (_a = this.serializationCallback) === null || _a === void 0 ? void 0 : _a.call(this, serializedStringified);
             const compressed = (0, compress_1.compress)(serializedStringified);
-            this.compressionCallback && this.compressionCallback(compressed);
+            (_b = this.compressionCallback) === null || _b === void 0 ? void 0 : _b.call(this, compressed);
             const encoded = (0, encode_1.encode)(compressed);
             return encoded;
         };
@@ -79,11 +80,7 @@ class Rangee {
                 if (range.startContainer === node) {
                     startFound = true;
                 }
-                if (startFound &&
-                    !endFound &&
-                    node.nodeType === constants_1.DOM_NODE_TEXT_NODE &&
-                    node.textContent &&
-                    node.textContent.trim().length > 0) {
+                if (startFound && !endFound && node.nodeType === constants_1.DOM_NODE_TEXT_NODE && node.textContent && node.textContent.trim().length > 0) {
                     const atomicRange = this.options.document.createRange();
                     atomicRange.setStart(node, node === range.startContainer ? range.startOffset : 0);
                     atomicRange.setEnd(node, node === range.endContainer ? range.endOffset : node.length);
@@ -92,7 +89,8 @@ class Rangee {
                 if (range.endContainer === node) {
                     endFound = true;
                 }
-            } while ((node = treeWalker.nextNode()));
+                node = treeWalker.nextNode();
+            } while (node);
             return atomicRanges;
         };
         this.options = options;
@@ -125,7 +123,7 @@ exports.compress = compress;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.decode = void 0;
-const decode = (base64) => new Uint8Array([...atob(base64)].map((c) => c.charCodeAt(0)));
+const decode = (base64) => new Uint8Array([...atob(base64)].map(c => c.charCodeAt(0)));
 exports.decode = decode;
 
 },{}],5:[function(require,module,exports){
@@ -146,10 +144,10 @@ const deserialize = (result, document) => {
     const range = document.createRange();
     let startNode = (0, findNodeBySelector_1.findNodeBySelector)(result.s, document);
     let endNode = (0, findNodeBySelector_1.findNodeBySelector)(result.e, document);
-    if (startNode.nodeType != constants_1.DOM_NODE_TEXT_NODE && startNode.firstChild) {
+    if (startNode.nodeType !== constants_1.DOM_NODE_TEXT_NODE && startNode.firstChild) {
         startNode = startNode.firstChild;
     }
-    if (endNode.nodeType != constants_1.DOM_NODE_TEXT_NODE && endNode.firstChild) {
+    if (endNode.nodeType !== constants_1.DOM_NODE_TEXT_NODE && endNode.firstChild) {
         endNode = endNode.firstChild;
     }
     if (startNode) {
@@ -177,7 +175,7 @@ const findNodeBySelector = (result, document) => {
     const element = document.querySelector(result.s);
     if (!element) {
         // TODO: Create RangeeError and throw here
-        throw new Error("Unable to find element with selector: " + result.s);
+        throw new Error(`Unable to find element with selector: ${result.s}`);
     }
     if (result.c !== undefined && result.c !== null) {
         return element.childNodes[result.c];
@@ -205,7 +203,7 @@ const computedNthIndex = (childElement) => {
     let elementsWithSameTag = 0;
     const parent = childElement.parentElement;
     if (parent) {
-        for (var i = 0, l = parent.childNodes.length; i < l; i++) {
+        for (let i = 0, l = parent.childNodes.length; i < l; i++) {
             const currentHtmlElement = parent.childNodes[i];
             if (currentHtmlElement === childElement) {
                 elementsWithSameTag++;
@@ -230,18 +228,18 @@ const generateSelector = (node, relativeTo) => {
                 const nthIndex = computedNthIndex(currentNode);
                 let selector = tagName;
                 if (nthIndex > 1) {
-                    selector += ":nth-of-type(" + nthIndex + ")";
+                    selector += `:nth-of-type(${nthIndex})`;
                 }
                 tagNames.push(selector);
             }
             currentNode = currentNode.parentElement;
-            if (currentNode == relativeTo.parentElement) {
+            if (currentNode === relativeTo.parentElement) {
                 break;
             }
         }
     }
     return {
-        s: tagNames.reverse().join(">").toLowerCase(),
+        s: tagNames.reverse().join('>').toLowerCase(),
         c: textNodeIndex,
         o: 0,
     };
@@ -252,7 +250,7 @@ exports.generateSelector = generateSelector;
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.serialize = void 0;
-const generateSelector_1 = require("../utils/generateSelector");
+const generateSelector_1 = require("./generateSelector");
 const serialize = (range, relativeTo) => {
     const start = (0, generateSelector_1.generateSelector)(range.startContainer, relativeTo);
     start.o = range.startOffset;
@@ -262,7 +260,7 @@ const serialize = (range, relativeTo) => {
 };
 exports.serialize = serialize;
 
-},{"../utils/generateSelector":9}],11:[function(require,module,exports){
+},{"./generateSelector":9}],11:[function(require,module,exports){
 // Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
 // This work is free. You can redistribute it and/or modify it
 // under the terms of the WTFPL, Version 2

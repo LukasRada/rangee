@@ -1,10 +1,10 @@
-﻿import { HtmlElementSelectorResult } from "./HtmlElementSelectorResult";
+import { HtmlElementSelectorResult } from './HtmlElementSelectorResult';
 
 // naming obscurity is because of minification result of string representation of ranges
 export interface RangeSerialized {
-  /** start */
-  s: HtmlElementSelectorResult;
+    /** start */
+    s: HtmlElementSelectorResult;
 
-  /** end */
-  e: HtmlElementSelectorResult;
+    /** end */
+    e: HtmlElementSelectorResult;
 }

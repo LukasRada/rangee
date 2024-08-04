@@ -1,2 +1,3 @@
-﻿import { Rangee } from "./Rangee";
+import { Rangee } from './Rangee';
+
 export = Rangee;

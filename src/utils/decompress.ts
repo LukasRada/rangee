@@ -1,4 +1,3 @@
-import { decompressFromUint8Array } from "lz-string";
+import { decompressFromUint8Array } from 'lz-string';
 
-export const decompress = (compressed: Uint8Array) =>
-  decompressFromUint8Array(compressed);
+export const decompress = (compressed: Uint8Array) => decompressFromUint8Array(compressed);

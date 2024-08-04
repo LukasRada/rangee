@@ -1,3 +1,3 @@
 export interface RangeeOptions {
-  document: Document;
+    document: Document;
 }

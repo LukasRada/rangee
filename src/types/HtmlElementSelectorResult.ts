@@ -1,11 +1,11 @@
 // naming obscurity is because of minification result of string representation of ranges
 export interface HtmlElementSelectorResult {
-  /** selector */
-  s: string;
+    /** selector */
+    s: string;
 
-  /** childIndexOf */
-  c?: number;
+    /** childIndexOf */
+    c?: number;
 
-  /** offset */
-  o: number;
+    /** offset */
+    o: number;
 }

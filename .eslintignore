@@ -1,0 +1,25 @@
+# general
+node_modules
+generated
+old
+_old
+examples
+docker
+public
+static
+
+# libs and builds
+dist
+lib
+.rpt2_cache
+build
+docs
+
+# debug files
+yarn-error.log
+cache
+.build
+solidity
+
+# folders
+ci
