@@ -1,7 +1,5 @@
 name: Build Rangee
 run-name: 🏗️ ${{ github.event.head_commit.message }}
-env:
-    PLAYWRIGHT_VERSION:
 on:
     workflow_call:
     push:
@@ -33,19 +31,7 @@ jobs:
                   token: ${{ secrets.CODECOV_TOKEN }}
             - name: Run build script
               run: yarn build
-            - name: Store Playwright's Version
-              run: |
-                  PLAYWRIGHT_VERSION=$(npm ls @playwright/test | grep @playwright | sed 's/.*@//')
-                  echo "Playwright's Version: $PLAYWRIGHT_VERSION"
-                  echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
-            - name: Cache Playwright Browsers for Playwright's Version
-              id: cache-playwright-browsers
-              uses: actions/cache@v4
-              with:
-                  path: ~/.cache/ms-playwright
-                  key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
-            - name: Setup Playwright
-              if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+            - name: Install Playwright Browsers
               run: npx playwright install --with-deps
             - name: Run Playwright tests
               run: |
