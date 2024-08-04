@@ -1,4 +1,4 @@
-import { RangeSerialized } from "../../src";
+import { RangeSerialized } from "../../src/types/RangeSerialized";
 import { deserialize } from "../../src/utils/deserialize";
 import { JSDOM } from "jsdom";
 

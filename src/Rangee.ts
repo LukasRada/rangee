@@ -30,7 +30,7 @@ export class Rangee {
   onCompression = (callback: (compressed: Uint8Array) => void) =>
     (this.compressionCallback = callback);
 
-  serializeAtomic = (range: Range) => {
+  serializeAtomic = (range: Range): string => {
     const atomicRanges = this.createAtomicRanges(range);
     const serialized = atomicRanges
       .map((range) => serialize(range.cloneRange(), this.options.document.body))
@@ -48,7 +48,7 @@ export class Rangee {
     return encoded;
   };
 
-  deserializeAtomic = (representation: string) => {
+  deserializeAtomic = (representation: string): Range[] => {
     const decoded = decode(representation);
     const decompressed = decompress(decoded);
     const serializedRanges = decompressed!
@@ -63,7 +63,7 @@ export class Rangee {
     return serializedRanges;
   };
 
-  serialize = (range: Range) => {
+  serialize = (range: Range): string => {
     const serialized = serialize(
       range.cloneRange(),
       this.options.document.body
@@ -80,7 +80,7 @@ export class Rangee {
     return encoded;
   };
 
-  deserialize = (serialized: string) => {
+  deserialize = (serialized: string): Range => {
     const decoded = decode(serialized);
     const decompressed = decompress(decoded);
     const decompressedParsed = JSON.parse(decompressed!) as RangeSerialized;
@@ -88,18 +88,32 @@ export class Rangee {
     return deserialized;
   };
 
-  private createAtomicRanges = (range: Range) => {
-    // text
-    if (
-      range.startContainer === range.endContainer &&
-      range.startContainer.nodeType === DOM_NODE_TEXT_NODE
-    ) {
-      return [range];
+  private createAtomicRanges = (range: Range): Range[] => {
+    if (range.startContainer === range.endContainer) {
+      // text
+      if (range.startContainer.nodeType === DOM_NODE_TEXT_NODE) {
+        return [range];
+      }
+      // exact element
+      const atomicRange = this.options.document.createRange();
+      const first = range.startContainer.firstChild!;
+      const last = range.startContainer.lastChild!;
+      if (first === last) {
+        atomicRange.setStart(
+          first,
+          first === range.startContainer ? range.startOffset : 0
+        );
+        atomicRange.setEnd(
+          last,
+          last === range.endContainer ? range.endOffset : (last as Text).length
+        );
+        return [atomicRange];
+      }
     }
 
     const documentAsAny = this.options.document as any; // IE does not know the right spec signature for createTreeWalker
 
-    // elements
+    // element texts
     const treeWalker = documentAsAny.createTreeWalker(
       range.commonAncestorContainer,
       DOM_NODE_FILTER_SHOW_ALL,
@@ -108,9 +122,16 @@ export class Rangee {
     ) as TreeWalker;
 
     const atomicRanges: Range[] = [];
+    let startFound = false;
+    let endFound = false;
     let node: Node | null = treeWalker.root;
     do {
+      if (range.startContainer === node) {
+        startFound = true;
+      }
       if (
+        startFound &&
+        !endFound &&
         node.nodeType === DOM_NODE_TEXT_NODE &&
         node.textContent &&
         node.textContent.trim().length > 0
@@ -122,11 +143,13 @@ export class Rangee {
         );
         atomicRange.setEnd(
           node,
-          node === range.endContainer
-            ? range.endOffset
-            : node.textContent.trim().length
+          node === range.endContainer ? range.endOffset : (node as Text).length
         );
         atomicRanges.push(atomicRange);
+      }
+
+      if (range.endContainer === node) {
+        endFound = true;
       }
     } while ((node = treeWalker.nextNode()));
 
