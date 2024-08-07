@@ -1,6 +1,6 @@
 {
-    "github.copilot.editor.enableAutoCompletions": false,
+    "github.copilot.editor.enableAutoCompletions": true,
     "cSpell.words": ["Rangee"],
-    "github.copilot.inlineSuggest.enable": true,
-    "prettier.tabWidth": 4
+    "prettier.tabWidth": 4,
+    "github.copilot.inlineSuggest.enable": true
 }

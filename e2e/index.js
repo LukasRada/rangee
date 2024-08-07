@@ -750,7 +750,9 @@ if (typeof define === 'function' && define.amd) {
 
 },{}],"rangee":[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Rangee = void 0;
 const Rangee_1 = require("./Rangee");
-module.exports = Rangee_1.Rangee;
+Object.defineProperty(exports, "Rangee", { enumerable: true, get: function () { return Rangee_1.Rangee; } });
 
 },{"./Rangee":1}]},{},[]);

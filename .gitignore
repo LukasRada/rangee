@@ -8,3 +8,4 @@ coverage
 /blob-report/
 /playwright/.cache/
 dist
+.DS_Store
