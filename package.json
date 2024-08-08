@@ -25,8 +25,8 @@
         "build": "npm run clean && node esbuild.js && tsc",
         "lint": "eslint . --ext .ts",
         "test:unit": "npx jest --verbose --runInBand --passWithNoTests",
+        "test:unit:ci": "npx jest --ci --coverage",
         "test:e2e": "npm run build && browserify -r ./lib/index.js:rangee > ./e2e/index.js && npx playwright test",
-        "test:ci": "npx jest --ci --coverage",
         "prepack": "npm run build"
     },
     "release": {
