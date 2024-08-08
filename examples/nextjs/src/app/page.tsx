@@ -1,52 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
+"use client";
+import { Rangee } from "rangee"
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complex HTML Page</title>
+export default function Home() {
+  const handleClick = () => {  
+    const selection = document.getSelection()
+    if (!selection) {
+        return;
+    }
+    const rangee = new Rangee({ document });
+    const range = selection.getRangeAt(0);
+    const rangeSerialized = rangee.serializeAtomic(range);
 
-    <script src="index.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const { Rangee } = require('rangee');
-            const rangee = new Rangee({ document: document });
-            document.getElementById('get').addEventListener('click', function () {
-                const selection = document.getSelection()
-                if (!selection) {
-                    return;
-                }
-                const range = selection.getRangeAt(0);
-                const rangeSerialized = rangee.serializeAtomic(range);
+    selection.removeAllRanges();
 
-                selection.removeAllRanges();
-
-                const deserializedRanges = rangee.deserializeAtomic(rangeSerialized);
-                deserializedRanges.forEach(range => {
-                    const highlight = document.createElement("mark")
-                    range.surroundContents(highlight);
-                })
-            });
-        });
-    </script>
-</head>
-
-<body>
-    <div class="container-fluid">
-        <button id="get">Highlight text</button>
+    const deserializedRanges = rangee.deserializeAtomic(rangeSerialized);
+    deserializedRanges.forEach(range => {
+        const highlight = document.createElement("mark")
+        range.surroundContents(highlight);
+    })
+   };
+  return (
+    <div>
+        <button onClick={handleClick}>Highlight text</button>
         <hr />
         <header>
             <h1>Complex HTML Page</h1>
             <p>Header section with some text.</p>
         </header>
 
-        <nav>
             <ul>
                 <li><a href="#section1">Section 1</a></li>
                 <li><a href="#section2">Section 2</a></li>
                 <li><a href="#section3">Section 3</a></li>
             </ul>
-        </nav>
 
         <main>
             <section id="section1">
@@ -58,9 +44,9 @@
                         <code>&lt;code&gt;</code>.
                     </p>
                     <pre>
-                    function example() {
+                    {` function example() {
                         console.log("This is a code block.");
-                    }
+                    }`}
                 </pre>
                 </article>
                 <aside>
@@ -120,38 +106,38 @@
                 </ol>
 
                 <form>
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" name="name"><br>
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email"><br>
-                    <label for="birthdate">Birthdate:</label>
-                    <input type="date" id="birthdate" name="birthdate"><br>
+                    <label htmlFor="name">Name:</label>
+                    <input type="text" id="name" name="name"/><br/>
+                    <label htmlFor="email">Email:</label>
+                    <input type="email" id="email" name="email"/><br/>
+                    <label htmlFor="birthdate">Birthdate:</label>
+                    <input type="date" id="birthdate" name="birthdate"/><br/>
                     <fieldset>
                         <legend>Preferences</legend>
-                        <label for="subscribe">Subscribe to newsletter:</label>
-                        <input type="checkbox" id="subscribe" name="subscribe"><br>
-                        <label for="gender">Gender:</label>
+                        <label htmlFor="subscribe">Subscribe to newsletter:</label>
+                        <input type="checkbox" id="subscribe" name="subscribe" /><br />
+                        <label htmlFor="gender">Gender:</label>
                         <select id="gender" name="gender">
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="other">Other</option>
                         </select>
                     </fieldset>
-                    <input type="submit" value="Submit">
+                    <input type="submit" value="Submit" />
                 </form>
 
                 <figure>
-                    <img src="https://via.placeholder.com/150" alt="Placeholder Image">
+                    <img src="https://via.placeholder.com/150" alt="Placeholder Image"/>
                     <figcaption>Figure caption for the image.</figcaption>
                 </figure>
 
                 <video controls>
-                    <source src="movie.mp4" type="video/mp4">
+                    <source src="movie.mp4" type="video/mp4"/>
                     Your browser does not support the video tag.
                 </video>
 
                 <audio controls>
-                    <source src="audio.mp3" type="audio/mpeg">
+                    <source src="audio.mp3" type="audio/mpeg"/>
                     Your browser does not support the audio element.
                 </audio>
             </section>
@@ -164,9 +150,5 @@
             </address>
         </footer>
     </div>
-
-
-
-</body>
-
-</html>
+  );
+}

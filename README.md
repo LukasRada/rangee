@@ -27,14 +27,20 @@ yarn
 ## Unit tests
 
 ```
-yarn test
+yarn test:unit
 ```
 
 ## E2E tests
 
 ```
-yarn build:e2e
-npx playwright test
+yarn test:e2e
+```
+
+## Example (NextJs app)
+```
+cd examples/nextjs
+yarn
+yarn dev
 ```
 
 ---
@@ -62,7 +68,7 @@ npx playwright test
 ## Example (store and highlight)
 
 ```javascript
-import Rangee from './Rangee';
+import Rangee from 'rangee';
 
 const rangee = new Rangee({ document });
 
@@ -83,9 +89,9 @@ document.querySelector("#save").addEventListener("click", () => {
 ...
 document.querySelector("#load").addEventListener("click", () => {
     const rangeRepresentation = rangeStorage; // earlier stored range representation
-    const ranges = rangee.deserilaizeAtomic(rangeRepresentation);
+    const ranges = rangee.deserializeAtomic(rangeRepresentation);
 
-    // highlight range (sub ranges - beacause of HTML structure)
+    // highlight range (sub ranges - because of HTML structure)
     ranges.forEach(range => {
         const highlight = document.createElement("mark")
         range.surroundContents(highlight);
@@ -111,3 +117,4 @@ document.querySelector("#load").addEventListener("click", () => {
 - [x] Prepare to npm
 - [x] Create table of supported browsers
 - [ ] Your idea?
+- [ ] Another serialization (binary? - or we need to get to the point where the serialized data are small as possible)

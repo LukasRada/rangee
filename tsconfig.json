@@ -1,15 +1,16 @@
 {
+    "include": ["src"],
     "compilerOptions": {
-        "strict": true,
-        "downlevelIteration": true,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "skipLibCheck": true,
-        "allowJs": false,
+        "module": "CommonJS",
+        "target": "ES6",
+        "lib": ["dom", "dom.iterable", "esnext"],
         "declaration": true,
-        "declarationMap": true,
-        "allowSyntheticDefaultImports": true
-    },
-    "exclude": ["node_modules"],
-    "include": ["src/**/*"]
+        "strict": true,
+        "moduleResolution": "node",
+        "jsx": "react",
+        "esModuleInterop": true,
+        "emitDeclarationOnly": true,
+        "outDir": "lib",
+        "rootDir": "src"
+    }
 }

@@ -2,9 +2,6 @@
 /*.*
 /azure-pipelines.yaml
 /tsconfig.json
-!dist/
 node_modules
 src
-tsconfig.base.json
-tsconfig.cjs.json
-tsconfig.esm.json
+

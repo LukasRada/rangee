@@ -1,36 +1,32 @@
 {
     "name": "rangee",
-    "version": "1.2.3",
+    "version": "1.3.0",
     "description": "Serialize/deserialize Range in HTML.",
+    "main": "lib/index.js",
+    "module": "lib/index.mjs",
+    "type": "commonjs",
     "exports": {
         ".": {
             "import": {
-                "types": "./lib/esm/types/index.d.ts",
-                "default": "./lib/esm/index.mjs"
+                "types": "./lib/index.d.ts",
+                "default": "./lib/index.mjs"
             },
             "require": {
-                "types": "./lib/cjs/types/index.d.ts",
-                "default": "./lib/cjs/index.js"
+                "types": "./lib/index.d.ts",
+                "default": "./lib/index.js"
             }
         }
     },
-    "module": "./lib/esm/index.mjs",
-    "types": "./lib/esm/types/index.d.ts",
-    "main": "./lib/esm/index.js",
     "files": [
         "lib"
     ],
     "scripts": {
-        "clean": "rimraf ./lib ./dist",
-        "build": "npm run clean && npm run build:esm && npm run build:cjs",
-        "build:esm": "tsc -p ./tsconfig.esm.json && move-file lib/esm/index.js lib/esm/index.mjs",
-        "build:cjs": "tsc -p ./tsconfig.cjs.json",
-        "build:esbuild": "rimraf dist && node esbuild.js && tsc -p ./tsconfig.esbuild.json && shx cp dist/index.js e2e/index.js",
-        "build:e2e": "yarn run build:cjs && browserify -r ./lib/cjs/index.js:rangee > ./e2e/index.js",
+        "clean": "rimraf ./lib",
+        "build": "npm run clean && node esbuild.js && tsc",
         "lint": "eslint . --ext .ts",
-        "test": "npx jest --verbose --runInBand --passWithNoTests",
+        "test:unit": "npx jest --verbose --runInBand --passWithNoTests",
+        "test:e2e": "npm run build && browserify -r ./lib/index.js:rangee > ./e2e/index.js && npx playwright test",
         "test:ci": "npx jest --ci --coverage",
-        "semantic-release": "semantic-release",
         "prepack": "npm run build"
     },
     "release": {
@@ -56,9 +52,6 @@
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/LukasRada/rangee/issues"
-    },
-    "resolutions": {
-        "string-width": "4.2.3"
     },
     "dependencies": {
         "lz-string": "1.5.0"
@@ -90,8 +83,6 @@
         "prettier": "3.2.5",
         "prettier-eslint": "16.3.0",
         "rimraf": "6.0.1",
-        "semantic-release": "24.0.0",
-        "shx": "0.3.4",
         "ts-jest": "29.2.4",
         "ts-node": "10.9.2",
         "typescript": "5.5.4"

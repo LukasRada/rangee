@@ -7,5 +7,5 @@ coverage
 /playwright-report/
 /blob-report/
 /playwright/.cache/
-dist
 .DS_Store
+.vscode/settings.json
