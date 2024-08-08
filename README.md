@@ -1,80 +1,85 @@
-# rangee
+# Rangee
 
-Serialize/deserialize [Range](https://developer.mozilla.org/en-US/docs/Web/API/Range) in HTML.
+**Rangee** is a lightweight JavaScript library designed to serialize and deserialize the [Range](https://developer.mozilla.org/en-US/docs/Web/API/Range) object in HTML. This enables the storage and retrieval of text selections across page loads.
 
-Cares about serialization/deserialization only.
-
-Highlighting of text is a matter of your implementation.
+While Rangee focuses solely on serialization and deserialization, it leaves the text highlighting logic to your implementation, offering flexibility in how you manage text selections.
 
 [![codecov](https://codecov.io/gh/LukasRada/rangee/branch/master/graph/badge.svg?token=3R33NFKKID)](https://codecov.io/gh/LukasRada/rangee)
 
 ---
 
-## Typical use case
+## Table of Contents
 
-1. User wants to highlight text in HTML.
-2. User wants to see the highlighted text in HTML on next page load (application should store Range representation and apply after page load).
-
----
-
-## Development
-
-```
-nvm use
-yarn
-```
-
-## Unit tests
-
-```
-yarn test:unit
-```
-
-## E2E tests
-
-```
-yarn test:e2e
-```
-
-## Example (NextJs app)
-```
-cd examples/nextjs
-yarn
-yarn dev
-```
+-   [Features](#features)
+-   [Use Cases](#use-cases)
+-   [Installation](#installation)
+-   [Usage](#usage)
+    -   [Basic Example](#basic-example)
+-   [How It Works](#how-it-works)
+    -   [Serialization Process](#serialization-process)
+    -   [Deserialization Process](#deserialization-process)
+-   [Development](#development)
+    -   [Running Unit Tests](#running-unit-tests)
+    -   [Running E2E Tests](#running-e2e-tests)
+-   [Example (Next.js App)](#example-nextjs-app)
+-   [Supported Browsers](#supported-browsers)
+-   [Roadmap](#roadmap)
+-   [Contributing](#contributing)
+-   [License](#license)
 
 ---
 
-## Under the hood
+## Features
 
-### From Range object to Range string representation
-
-1. Create array of atomic range objects only with text inside from input range.
-2. Create HTML selector from array of atomic ranges as JSON.
-3. Serialization.
-4. Compression.
-5. Encoding.
-
-### From Range string representation to Range object
-
-1. Decoding.
-2. Decompression.
-3. Deserialization.
-4. JSON parse.
-5. Array of Range DOM.
+-   **Serialization**: Convert HTML Range objects into compact string representations.
+-   **Deserialization**: Reconstruct HTML Range objects from serialized strings.
+-   **Compression**: Efficiently compress serialized data for storage.
+-   **Cross-Browser Support**: Compatible with modern browsers and IE11/Edge.
 
 ---
 
-## Example (store and highlight)
+## Use Cases
+
+### Highlighting Text in HTML
+
+Store the user's text selection across sessions and reloads by serializing the Range object. Upon the next page load, the stored range can be deserialized and used to reapply the highlights.
+
+### Persistent Text Selections
+
+Ideal for applications where users interact with content, like reading apps or educational tools, where it's essential to remember text selections or highlights.
+
+---
+
+## Installation
+
+Install Rangee using Yarn or npm:
+
+```bash
+yarn add rangee
+```
+
+or
+
+```bash
+npm install rangee
+```
+
+---
+
+## Usage
+
+### Basic Example
+
+Here's a simple example of how to use Rangee to serialize and deserialize a text selection:
 
 ```javascript
 import Rangee from 'rangee';
 
 const rangee = new Rangee({ document });
 
-let rangeStorage = "";
+let rangeStorage = '';
 
-document.querySelector("#save").addEventListener("click", () => {
+document.querySelector('#save').addEventListener('click', () => {
     const selection = document.getSelection();
     if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
@@ -82,39 +87,112 @@ document.querySelector("#save").addEventListener("click", () => {
         if (range) {
             const rangeRepresentation = rangee.serializeAtomic(range);
             rangeStorage = rangeRepresentation;
-            // there you have rangee output (range representation in base64) and you can store somewhere
+            // Store rangeRepresentation for future use
         }
     }
-})
-...
-document.querySelector("#load").addEventListener("click", () => {
-    const rangeRepresentation = rangeStorage; // earlier stored range representation
+});
+
+document.querySelector('#load').addEventListener('click', () => {
+    const rangeRepresentation = rangeStorage; // Retrieve stored range representation
     const ranges = rangee.deserializeAtomic(rangeRepresentation);
 
-    // highlight range (sub ranges - because of HTML structure)
+    // Highlight the deserialized ranges
     ranges.forEach(range => {
-        const highlight = document.createElement("mark")
+        const highlight = document.createElement('mark');
         range.surroundContents(highlight);
-    })
-})
-
+    });
+});
 ```
 
-## Supported browsers
+---
 
-<table class="rich-diff-level-zero"> <thead class="rich-diff-level-one"> <tr> <th>
-<a href="http://godban.github.io/browsers-support-badges/" rel="nofollow"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="24px" height="24px" style="max-width:100%;"></a><br>IE11 / Edge</th> <th>
-<a href="http://godban.github.io/browsers-support-badges/" rel="nofollow"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" style="max-width:100%;"></a><br>Firefox</th> <th>
-<a href="http://godban.github.io/browsers-support-badges/" rel="nofollow"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" style="max-width:100%;"></a><br>Chrome</th> <th>
-<a href="http://godban.github.io/browsers-support-badges/" rel="nofollow"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" style="max-width:100%;"></a><br>Safari</th> <th>
-<a href="http://godban.github.io/browsers-support-badges/" rel="nofollow"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera_48x48.png" alt="Opera" width="24px" height="24px" style="max-width:100%;"></a><br>Opera</th> </tr> </thead> 
+## How It Works
+
+### Serialization Process
+
+1. **Range Object to Atomic Ranges**: Break down the input Range into atomic ranges, focusing on text nodes only.
+2. **Create HTML Selector**: Convert the array of atomic ranges into a JSON representation.
+3. **Serialization**: Serialize the JSON into a string format.
+4. **Compression**: Apply deflate compression to reduce the data size.
+5. **Encoding**: Encode the compressed data into a base64 string for easy storage.
+
+### Deserialization Process
+
+1. **Decoding**: Convert the base64 string back to compressed data.
+2. **Decompression**: Decompress the data to retrieve the serialized string.
+3. **Deserialization**: Convert the string back to a JSON object.
+4. **JSON Parsing**: Parse the JSON to reconstruct the array of atomic ranges.
+5. **Rebuild Range Objects**: Use the atomic ranges to create a DOM Range object.
+
+---
+
+## Development
+
+### Running Unit Tests
+
+To run the unit tests:
+
+```bash
+yarn test:unit
+```
+
+### Running E2E Tests
+
+To run the end-to-end tests:
+
+```bash
+yarn test:e2e
+```
+
+---
+
+## Example (Next.js App)
+
+To see Rangee in action within a Next.js app:
+
+```bash
+cd examples/nextjs
+yarn
+yarn dev
+```
+
+---
+
+## Supported Browsers
+
+Rangee supports the following browsers:
+
+<table class="rich-diff-level-zero"> 
+<thead class="rich-diff-level-one"> 
+<tr> 
+<th><a href="http://godban.github.io/browsers-support-badges/" rel="nofollow"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="24px" height="24px" style="max-width:100%;"></a><br>IE11 / Edge</th> 
+<th><a href="http://godban.github.io/browsers-support-badges/" rel="nofollow"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" style="max-width:100%;"></a><br>Firefox</th> 
+<th><a href="http://godban.github.io/browsers-support-badges/" rel="nofollow"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" style="max-width:100%;"></a><br>Chrome</th> 
+<th><a href="http://godban.github.io/browsers-support-badges/" rel="nofollow"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" style="max-width:100%;"></a><br>Safari</th> 
+<th><a href="http://godban.github.io/browsers-support-badges/" rel="nofollow"><img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera_48x48.png" alt="Opera" width="24px" height="24px" style="max-width:100%;"></a><br>Opera</th> 
+</tr> 
+</thead> 
 </table>
+
+---
 
 ## Roadmap
 
-- [x] Basic functionality
-- [x] Implement deflate compression
-- [x] Prepare to npm
-- [x] Create table of supported browsers
-- [ ] Your idea?
-- [ ] Another serialization (binary? - or we need to get to the point where the serialized data are small as possible)
+-   [x] Basic functionality
+-   [x] Implement deflate compression
+-   [x] Prepare for npm release
+-   [x] Create a table of supported browsers
+-   [ ] Support for additional serialization formats (e.g., binary) for even smaller data sizes
+-   [ ] **Your idea?** Contributions and suggestions are welcome!
+
+---
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request with your ideas and improvements.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for more details.
