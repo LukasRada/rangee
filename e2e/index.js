@@ -497,16 +497,26 @@ var DOM_NODE_TEXT_NODE = 3;
 var DOM_NODE_FILTER_ACCEPT = 1;
 var DOM_NODE_FILTER_SHOW_ALL = 4294967295;
 
-// src/utils/compress.ts
+// src/utils/compression/DefaultCompressionStrategy.ts
 var import_lz_string = __toESM(require_lz_string());
-var compress = (decompressed) => (0, import_lz_string.compressToUint8Array)(decompressed);
+var DefaultCompressionStrategy = class {
+  compress(decompressed) {
+    return (0, import_lz_string.compressToUint8Array)(decompressed);
+  }
+  decompress(compressed) {
+    return (0, import_lz_string.decompressFromUint8Array)(compressed);
+  }
+};
 
-// src/utils/decode.ts
-var decode = (base64) => new Uint8Array([...atob(base64)].map((c) => c.charCodeAt(0)));
-
-// src/utils/decompress.ts
-var import_lz_string2 = __toESM(require_lz_string());
-var decompress = (compressed) => (0, import_lz_string2.decompressFromUint8Array)(compressed);
+// src/utils/encoding/DefaultEncodingStrategy.ts
+var DefaultEncodingStrategy = class {
+  encode(buffer) {
+    return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+  }
+  decode(encoded) {
+    return Uint8Array.from(atob(encoded), (c) => c.charCodeAt(0));
+  }
+};
 
 // src/utils/findNodeBySelector.ts
 var findNodeBySelector = (result, document) => {
@@ -519,29 +529,6 @@ var findNodeBySelector = (result, document) => {
   }
   return element;
 };
-
-// src/utils/deserialize.ts
-var deserialize = (result, document) => {
-  const range = document.createRange();
-  let startNode = findNodeBySelector(result.s, document);
-  let endNode = findNodeBySelector(result.e, document);
-  if (startNode.nodeType !== DOM_NODE_TEXT_NODE && startNode.firstChild) {
-    startNode = startNode.firstChild;
-  }
-  if (endNode.nodeType !== DOM_NODE_TEXT_NODE && endNode.firstChild) {
-    endNode = endNode.firstChild;
-  }
-  if (startNode) {
-    range.setStart(startNode, result.s.o);
-  }
-  if (endNode) {
-    range.setEnd(endNode, result.e.o);
-  }
-  return range;
-};
-
-// src/utils/encode.ts
-var encode = (buffer) => btoa(String.fromCharCode(...new Uint8Array(buffer)));
 
 // src/utils/generateSelector.ts
 var childNodeIndexOf = (parentNode, childNode) => Array.prototype.indexOf.call(parentNode.childNodes, childNode);
@@ -579,13 +566,48 @@ var generateSelector = (node, relativeTo) => {
   };
 };
 
-// src/utils/serialize.ts
-var serialize = (range, relativeTo) => {
-  const start = generateSelector(range.startContainer, relativeTo);
-  start.o = range.startOffset;
-  const end = generateSelector(range.endContainer, relativeTo);
-  end.o = range.endOffset;
-  return { s: start, e: end };
+// src/utils/serialization/DefaultSerializationStrategy.ts
+var DefaultSerializationStrategy = class {
+  serialize(ranges, relativeTo) {
+    if (ranges.length === 0) {
+      return "{}";
+    }
+    return ranges.map((range) => {
+      const start = generateSelector(range.startContainer, relativeTo);
+      start.o = range.startOffset;
+      const end = generateSelector(range.endContainer, relativeTo);
+      end.o = range.endOffset;
+      return JSON.stringify({ s: start, e: end });
+    }).join("|");
+  }
+  deserialize(serialized, document) {
+    return serialized.split("|").map((serialized2) => JSON.parse(serialized2)).map((range) => {
+      const resultRange = document.createRange();
+      if (this.isRangeSerialized(range) && range.s.s && range.e.s) {
+        let startNode = findNodeBySelector(range.s, document);
+        let endNode = findNodeBySelector(range.e, document);
+        if (startNode.nodeType !== DOM_NODE_TEXT_NODE && startNode.firstChild) {
+          startNode = startNode.firstChild;
+        }
+        if (endNode.nodeType !== DOM_NODE_TEXT_NODE && endNode.firstChild) {
+          endNode = endNode.firstChild;
+        }
+        if (startNode) {
+          resultRange.setStart(startNode, range.s.o);
+        }
+        if (endNode) {
+          resultRange.setEnd(endNode, range.e.o);
+        }
+      }
+      return resultRange;
+    });
+  }
+  isRangeSerialized(range) {
+    return range.s !== void 0 && range.e !== void 0;
+  }
+  isHtmlElementSelectorResult(range) {
+    return range.s !== void 0 && range.o !== void 0;
+  }
 };
 
 // src/Rangee.ts
@@ -595,34 +617,37 @@ var Rangee = class {
     this.onCompression = (callback) => this.compressionCallback = callback;
     this.serializeAtomic = (range) => {
       const atomicRanges = this.createAtomicRanges(range);
-      const serialized = atomicRanges.map((range2) => serialize(range2.cloneRange(), this.options.document.body)).map((serializedRange) => JSON.stringify(serializedRange)).join("|");
+      const { compressionsStrategy, serializeStrategy, encodingStrategy } = this.options;
+      if (!serializeStrategy) {
+        throw new Error("Serialization strategy is not defined");
+      }
+      const serialized = serializeStrategy.serialize(atomicRanges, this.options.document.body);
       this.serializationCallback?.(serialized);
-      const compressed = compress(serialized);
+      if (!compressionsStrategy) {
+        throw new Error("Compression strategy is not defined");
+      }
+      const compressed = compressionsStrategy.compress(serialized);
       this.compressionCallback?.(compressed);
-      const encoded = encode(compressed);
+      if (!encodingStrategy) {
+        throw new Error("Encoding strategy is not defined");
+      }
+      const encoded = encodingStrategy.encode(compressed);
       return encoded;
     };
     this.deserializeAtomic = (representation) => {
-      const decoded = decode(representation);
-      const decompressed = decompress(decoded);
-      const serializedRanges = decompressed.split("|").map((decompressedRangeRepresentation) => JSON.parse(decompressedRangeRepresentation)).map((serializedRange) => deserialize(serializedRange, this.options.document));
-      return serializedRanges;
-    };
-    this.serialize = (range) => {
-      const serialized = serialize(range.cloneRange(), this.options.document.body);
-      const serializedStringified = JSON.stringify(serialized);
-      this.serializationCallback?.(serializedStringified);
-      const compressed = compress(serializedStringified);
-      this.compressionCallback?.(compressed);
-      const encoded = encode(compressed);
-      return encoded;
-    };
-    this.deserialize = (serialized) => {
-      const decoded = decode(serialized);
-      const decompressed = decompress(decoded);
-      const decompressedParsed = JSON.parse(decompressed);
-      const deserialized = deserialize(decompressedParsed, this.options.document);
-      return deserialized;
+      const { compressionsStrategy, serializeStrategy, encodingStrategy } = this.options;
+      if (!encodingStrategy) {
+        throw new Error("Encoding strategy is not defined");
+      }
+      const decoded = encodingStrategy.decode(representation);
+      if (!compressionsStrategy) {
+        throw new Error("Compression strategy is not defined");
+      }
+      const decompressed = compressionsStrategy.decompress(decoded);
+      if (!serializeStrategy) {
+        throw new Error("Serialization strategy is not defined");
+      }
+      return serializeStrategy.deserialize(decompressed, this.options.document);
     };
     this.createAtomicRanges = (range) => {
       if (range.startContainer === range.endContainer) {
@@ -666,7 +691,12 @@ var Rangee = class {
       } while (node);
       return atomicRanges;
     };
-    this.options = options;
+    this.options = {
+      ...options,
+      serializeStrategy: options.serializeStrategy || new DefaultSerializationStrategy(),
+      encodingStrategy: options.encodingStrategy || new DefaultEncodingStrategy(),
+      compressionsStrategy: options.compressionsStrategy || new DefaultCompressionStrategy()
+    };
     this.serializationCallback = null;
     this.compressionCallback = null;
   }

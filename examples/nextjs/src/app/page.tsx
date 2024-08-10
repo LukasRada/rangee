@@ -8,6 +8,8 @@ export default function Home() {
         return;
     }
     const rangee = new Rangee({ document });
+    rangee.onCompression((range) => { console.log("Compressed range", range) });
+    rangee.onSerialization((range) => { console.log("Serialized range", range) });
     const range = selection.getRangeAt(0);
     const rangeSerialized = rangee.serializeAtomic(range);
 

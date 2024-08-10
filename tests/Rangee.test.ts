@@ -1,43 +1,31 @@
 import { JSDOM } from 'jsdom';
 import { Rangee } from '../src/Rangee';
+import { RangeeOptions } from '../src/types/RangeeOptions';
 
 describe('Rangee', () => {
-    test('serialize / deserialize', () => {
-        const basicHtml = `<html><body><div><h1>Example Domain</h1></div></body></html>`;
-        const dom = new JSDOM(basicHtml, { url: 'http://localhost/' });
-        const range = dom.window.document.createRange();
-        const heading = dom.window.document.body.querySelector('h1')!;
-        range.setStart(heading.firstChild!, 0);
-        range.setEnd(heading.firstChild!, 14);
-        const rangee = new Rangee({ document: dom.window.document });
-        let compressedResult = new Uint8Array();
-        rangee.onCompression(compressed => {
-            compressedResult = compressed;
-        });
-        let serializedResult = '';
-        rangee.onSerialization(serialized => {
-            serializedResult = serialized;
-        });
-        const result = rangee.serialize(range);
-        const deserialized = rangee.deserialize(result);
-        expect(deserialized.toString()).toStrictEqual('Example Domain');
-        expect(serializedResult).toStrictEqual(`{"s":{"s":"body>div>h1","c":0,"o":0},"e":{"s":"body>div>h1","c":0,"o":14}}`);
-        expect(compressedResult).toStrictEqual(
-            new Uint8Array([
-                55, 130, 32, 206, 32, 92, 161, 146, 4, 96, 123, 0, 152, 19, 192, 124, 200, 37, 128, 221, 208, 11, 1, 24, 64, 6, 132, 1, 140, 160, 1,
-                140, 197, 168, 23, 204, 129, 76, 161, 138, 4, 80, 219, 60, 141, 34, 235, 105, 68, 32, 5, 158, 189, 32, 0, 0,
-            ]),
-        );
+    const getRangeeInstance = (
+        basicHtml: string = '',
+        rangeeOptions: RangeeOptions = {
+            document: new JSDOM(basicHtml, { url: 'http://localhost/' }).window.document,
+        },
+    ) => [new Rangee(rangeeOptions), rangeeOptions.document] as const;
+
+    test('serialize empty range', () => {
+        const [rangee, document] = getRangeeInstance();
+        const range = document.createRange();
+        const result = rangee.serializeAtomic(range);
+        const deserializedAtomic = rangee.deserializeAtomic(result);
+        expect(deserializedAtomic[0].toString()).toStrictEqual('');
     });
 
     test('atomic serialize / atomic deserialize - single node', () => {
         const basicHtml = `<html><body><div><h1>Example Domain</h1></div></body></html>`;
-        const dom = new JSDOM(basicHtml, { url: 'http://localhost/' });
-        const range = dom.window.document.createRange();
-        const heading = dom.window.document.body.querySelector('h1')!;
+        const [rangee, document] = getRangeeInstance(basicHtml);
+        const range = document.createRange();
+        const heading = document.body.querySelector('h1')!;
         range.setStart(heading.firstChild!, 0);
         range.setEnd(heading.firstChild!, 14);
-        const rangee = new Rangee({ document: dom.window.document });
+
         const result = rangee.serializeAtomic(range);
         const deserializedAtomic = rangee.deserializeAtomic(result);
         expect(deserializedAtomic[0].toString()).toStrictEqual('Example Domain');
@@ -45,12 +33,11 @@ describe('Rangee', () => {
 
     test('atomic serialize / atomic deserialize - single node exact', () => {
         const basicHtml = `<html><body><div><h1>Example Domain</h1></div></body></html>`;
-        const dom = new JSDOM(basicHtml, { url: 'http://localhost/' });
-        const range = dom.window.document.createRange();
-        const heading = dom.window.document.body.querySelector('h1')!;
+        const [rangee, document] = getRangeeInstance(basicHtml);
+        const range = document.createRange();
+        const heading = document.body.querySelector('h1')!;
         range.setStart(heading, 0);
         range.setEnd(heading, 0);
-        const rangee = new Rangee({ document: dom.window.document });
         const result = rangee.serializeAtomic(range);
         const deserializedAtomic = rangee.deserializeAtomic(result);
         expect(deserializedAtomic[0].toString()).toStrictEqual('Example Domain');
@@ -58,13 +45,12 @@ describe('Rangee', () => {
 
     test('atomic serialize / atomic deserialize - multiple nodes', () => {
         const basicHtml = `<html><body><div><h1><span id="first">Example</span> <span id="second">Domain</span></h1></div></body></html>`;
-        const dom = new JSDOM(basicHtml, { url: 'http://localhost/' });
-        const range = dom.window.document.createRange();
-        const first = dom.window.document.body.querySelector('span#first')!;
-        const second = dom.window.document.body.querySelector('span#second')!;
+        const [rangee, document] = getRangeeInstance(basicHtml);
+        const range = document.createRange();
+        const first = document.body.querySelector('span#first')!;
+        const second = document.body.querySelector('span#second')!;
         range.setStart(first.firstChild!, 1);
         range.setEnd(second.firstChild!, 5);
-        const rangee = new Rangee({ document: dom.window.document });
         let compressedResult = new Uint8Array();
         rangee.onCompression(compressed => {
             compressedResult = compressed;
@@ -93,32 +79,79 @@ describe('Rangee', () => {
 
     test('atomic / atomic - issue #7', () => {
         const basicHtml = `<html><body class="whatever"><br/><br/>start<span>end</span></body></html>`;
-        const dom = new JSDOM(basicHtml, { url: 'http://localhost/' });
-        const range = dom.window.document.createRange();
-        const endSpan = dom.window.document.body.querySelector('span')!;
+        const [rangee, document] = getRangeeInstance(basicHtml);
+        const range = document.createRange();
+        const endSpan = document.body.querySelector('span')!;
         // selecting "tarten"
-        range.setStart(dom.window.document.body.childNodes[2], 1);
+        range.setStart(document.body.childNodes[2], 1);
         range.setEnd(endSpan!.firstChild!, 2);
-        const rangee = new Rangee({ document: dom.window.document });
-        const result = rangee.serialize(range);
-        const deserializedAtomic = rangee.deserialize(result);
-
-        expect(deserializedAtomic.toString()).toStrictEqual('tarten');
+        const result = rangee.serializeAtomic(range);
+        const deserializedAtomic = rangee.deserializeAtomic(result);
+        expect(deserializedAtomic[0].toString()).toStrictEqual('tart');
+        expect(deserializedAtomic[1].toString()).toStrictEqual('en');
+        expect(deserializedAtomic[2]?.toString()).toStrictEqual(undefined);
     });
 
     test('atomic serialize / atomic deserialize - issue #7', () => {
         const basicHtml = `<html><body class="whatever"><br/><br/>start<span>end</span></body></html>`;
-        const dom = new JSDOM(basicHtml, { url: 'http://localhost/' });
-        const range = dom.window.document.createRange();
-        const endSpan = dom.window.document.body.querySelector('span')!;
+        const [rangee, document] = getRangeeInstance(basicHtml);
+        const range = document.createRange();
+        const endSpan = document.body.querySelector('span')!;
         // selecting "tarten"
-        range.setStart(dom.window.document.body.childNodes[2], 1);
+        range.setStart(document.body.childNodes[2], 1);
         range.setEnd(endSpan!.firstChild!, 2);
-        const rangee = new Rangee({ document: dom.window.document });
         const result = rangee.serializeAtomic(range);
         const deserializedAtomic = rangee.deserializeAtomic(result);
 
         expect(deserializedAtomic[0].toString()).toStrictEqual('tart');
         expect(deserializedAtomic[1].toString()).toStrictEqual('en');
+    });
+
+    test('atomic serialize / atomic deserialize - two empty divs', () => {
+        const [rangee, document] = getRangeeInstance();
+        const startContainer = document.createElement('div');
+        const endContainer = document.createElement('div');
+        document.body.appendChild(startContainer);
+        document.body.appendChild(endContainer);
+        const mockRange: Range = {
+            commonAncestorContainer: document.body,
+            collapsed: false,
+            endContainer,
+            endOffset: 0,
+            startContainer,
+            startOffset: 0,
+            cloneContents: jest.fn(),
+            cloneRange: jest.fn(),
+            collapse: jest.fn(),
+            compareBoundaryPoints: jest.fn(),
+            comparePoint: jest.fn(),
+            createContextualFragment: jest.fn(),
+            deleteContents: jest.fn(),
+            detach: jest.fn(),
+            extractContents: jest.fn(),
+            getBoundingClientRect: jest.fn(),
+            getClientRects: jest.fn(),
+            insertNode: jest.fn(),
+            intersectsNode: jest.fn(),
+            isPointInRange: jest.fn(),
+            selectNode: jest.fn(),
+            selectNodeContents: jest.fn(),
+            setEnd: jest.fn(),
+            setEndAfter: jest.fn(),
+            setEndBefore: jest.fn(),
+            setStart: jest.fn(),
+            setStartAfter: jest.fn(),
+            setStartBefore: jest.fn(),
+            surroundContents: jest.fn(),
+            toString: jest.fn(),
+            START_TO_START: 0,
+            START_TO_END: 1,
+            END_TO_END: 2,
+            END_TO_START: 3,
+        };
+        const result = rangee.serializeAtomic(mockRange);
+        const result2 = rangee.deserializeAtomic(result);
+        expect(result).toStrictEqual('N4XyAA==');
+        expect(result2[0].toString()).toStrictEqual('');
     });
 });
