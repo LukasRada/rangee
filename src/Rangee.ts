@@ -1,12 +1,8 @@
 import { DOM_NODE_FILTER_ACCEPT, DOM_NODE_FILTER_SHOW_ALL, DOM_NODE_TEXT_NODE } from './constants';
-import { RangeSerialized } from './types/RangeSerialized';
 import { RangeeOptions } from './types/RangeeOptions';
-import { compress } from './utils/compress';
-import { decode } from './utils/decode';
-import { decompress } from './utils/decompress';
-import { deserialize } from './utils/deserialize';
-import { encode } from './utils/encode';
-import { serialize } from './utils/serialize';
+import { DefaultCompressionStrategy } from './utils/compression/DefaultCompressionStrategy';
+import { DefaultEncodingStrategy } from './utils/encoding/DefaultEncodingStrategy';
+import { DefaultSerializationStrategy } from './utils/serialization/DefaultSerializationStrategy';
 
 // TODO: Implement debug mode with nice debug line log
 
@@ -16,7 +12,12 @@ export class Rangee {
     private compressionCallback: ((compressed: Uint8Array) => void) | null;
 
     constructor(options: RangeeOptions) {
-        this.options = options;
+        this.options = {
+            ...options,
+            serializeStrategy: options.serializeStrategy || new DefaultSerializationStrategy(),
+            encodingStrategy: options.encodingStrategy || new DefaultEncodingStrategy(),
+            compressionsStrategy: options.compressionsStrategy || new DefaultCompressionStrategy(),
+        };
         this.serializationCallback = null;
         this.compressionCallback = null;
     }
@@ -26,51 +27,41 @@ export class Rangee {
 
     serializeAtomic = (range: Range): string => {
         const atomicRanges = this.createAtomicRanges(range);
-        const serialized = atomicRanges
-            .map(range => serialize(range.cloneRange(), this.options.document.body))
-            .map(serializedRange => JSON.stringify(serializedRange))
-            .join('|');
+        const { compressionsStrategy, serializeStrategy, encodingStrategy } = this.options;
 
+        if (!serializeStrategy) {
+            throw new Error('Serialization strategy is not defined');
+        }
+        const serialized = serializeStrategy.serialize(atomicRanges, this.options.document.body);
         this.serializationCallback?.(serialized);
 
-        const compressed = compress(serialized);
-
+        if (!compressionsStrategy) {
+            throw new Error('Compression strategy is not defined');
+        }
+        const compressed = compressionsStrategy.compress(serialized);
         this.compressionCallback?.(compressed);
 
-        const encoded = encode(compressed);
-
+        if (!encodingStrategy) {
+            throw new Error('Encoding strategy is not defined');
+        }
+        const encoded = encodingStrategy.encode(compressed);
         return encoded;
     };
 
     deserializeAtomic = (representation: string): Range[] => {
-        const decoded = decode(representation);
-        const decompressed = decompress(decoded);
-        const serializedRanges = decompressed!
-            .split('|')
-            .map(decompressedRangeRepresentation => JSON.parse(decompressedRangeRepresentation) as RangeSerialized)
-            .map(serializedRange => deserialize(serializedRange, this.options.document));
-        return serializedRanges;
-    };
-
-    serialize = (range: Range): string => {
-        const serialized = serialize(range.cloneRange(), this.options.document.body);
-
-        const serializedStringified = JSON.stringify(serialized);
-        this.serializationCallback?.(serializedStringified);
-
-        const compressed = compress(serializedStringified);
-        this.compressionCallback?.(compressed);
-
-        const encoded = encode(compressed);
-        return encoded;
-    };
-
-    deserialize = (serialized: string): Range => {
-        const decoded = decode(serialized);
-        const decompressed = decompress(decoded);
-        const decompressedParsed = JSON.parse(decompressed!) as RangeSerialized;
-        const deserialized = deserialize(decompressedParsed, this.options.document);
-        return deserialized;
+        const { compressionsStrategy, serializeStrategy, encodingStrategy } = this.options;
+        if (!encodingStrategy) {
+            throw new Error('Encoding strategy is not defined');
+        }
+        const decoded = encodingStrategy.decode(representation);
+        if (!compressionsStrategy) {
+            throw new Error('Compression strategy is not defined');
+        }
+        const decompressed = compressionsStrategy.decompress(decoded);
+        if (!serializeStrategy) {
+            throw new Error('Serialization strategy is not defined');
+        }
+        return serializeStrategy.deserialize(decompressed, this.options.document);
     };
 
     private createAtomicRanges = (range: Range): Range[] => {

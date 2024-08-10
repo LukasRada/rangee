@@ -1,4 +1,4 @@
 {
     "extends": "./tsconfig.json",
-    "include": ["src/**/*", "tests/**/*", "playwright.config.ts", "e2e/index.spec.ts"]
+    "include": ["src/**/*", "tests/**/*", "playwright.config.ts", "e2e/index.spec.ts", "benchmark/**/*"]
 }

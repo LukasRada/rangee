@@ -1,0 +1,11 @@
+{
+    "extends": "../tsconfig.json",
+    "include": ["./benchmark"],
+    "compilerOptions": {
+        "baseUrl": "./",
+        "target": "es2017",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "esModuleInterop": true
+    }
+}

@@ -22,6 +22,7 @@
     ],
     "scripts": {
         "clean": "rimraf ./lib",
+        "benchmark": "npm run --prefix benchmark benchmark",
         "build": "npm run clean && node esbuild.js && tsc",
         "lint": "eslint . --ext .ts",
         "test:unit": "npx jest --verbose --runInBand --passWithNoTests",
@@ -54,7 +55,9 @@
         "url": "https://github.com/LukasRada/rangee/issues"
     },
     "dependencies": {
-        "lz-string": "1.5.0"
+        "@types/pako": "^2.0.3",
+        "lz-string": "1.5.0",
+        "pako": "2.1.0"
     },
     "devDependencies": {
         "@playwright/test": "^1.45.3",
@@ -83,8 +86,8 @@
         "prettier": "3.2.5",
         "prettier-eslint": "16.3.0",
         "rimraf": "6.0.1",
+        "tinybench": "2.9.0",
         "ts-jest": "29.2.4",
-        "ts-node": "10.9.2",
         "typescript": "5.5.4"
     }
 }
