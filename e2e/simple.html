@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex HTML Page</title>
+
+    <script src="index.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const { Rangee, ByteSerializationStrategy } = require('rangee');
+            const rangee = new Rangee({ document: document, serializeStrategy: new ByteSerializationStrategy() });
+            rangee.serializationCallback = (serialized) => {
+                console.log(serialized);
+            }
+            document.getElementById('get').addEventListener('click', function () {
+                const selection = document.getSelection()
+                if (!selection) {
+                    return;
+                }
+                const range = selection.getRangeAt(0);
+                const rangeSerialized = rangee.serializeAtomic(range);
+
+                selection.removeAllRanges();
+
+                const deserializedRanges = rangee.deserializeAtomic(rangeSerialized);
+                deserializedRanges.forEach(range => {
+                    const highlight = document.createElement("mark")
+                    range.surroundContents(highlight);
+                })
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <button id="get">Highlight text</button>
+        <hr />
+        <div>
+            <h1><span>Example</span> <span>Domain</span></h1>
+        </div>
+</body>
+
+</html>

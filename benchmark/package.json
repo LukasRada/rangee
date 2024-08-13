@@ -1,7 +1,7 @@
 {
     "type": "module",
     "scripts": {
-        "benchmark": "tsx serialization.ts"
+        "benchmark": "tsx index.ts"
     },
     "devDependencies": {
         "jsdom": "23.2.0",
