@@ -53,7 +53,7 @@ export class ByteSerializationStrategy implements SerializationStrategy {
         });
     }
 
-    private encodeSelectorWithCO(selector: string, o: number, c?: number): string {
+    encodeSelectorWithCO(selector: string, o: number, c?: number): string {
         const encodedSelector = selector
             .split('>')
             .map(part => {
@@ -75,7 +75,7 @@ export class ByteSerializationStrategy implements SerializationStrategy {
         return `${encodedSelector}${oHex}${cHex}`;
     }
 
-    private decodeSelectorWithCO(encoded: string): HtmlElementSelectorResult {
+    decodeSelectorWithCO(encoded: string): HtmlElementSelectorResult {
         let selector = '';
         let i = 0;
         while (i < encoded.length - 4) {

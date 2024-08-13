@@ -29,39 +29,21 @@ export class Rangee {
         const atomicRanges = this.createAtomicRanges(range);
         const { compressionsStrategy, serializeStrategy, encodingStrategy } = this.options;
 
-        if (!serializeStrategy) {
-            throw new Error('Serialization strategy is not defined');
-        }
-        const serialized = serializeStrategy.serialize(atomicRanges, this.options.document.body);
+        const serialized = serializeStrategy!.serialize(atomicRanges, this.options.document.body);
         this.serializationCallback?.(serialized);
 
-        if (!compressionsStrategy) {
-            throw new Error('Compression strategy is not defined');
-        }
-        const compressed = compressionsStrategy.compress(serialized);
+        const compressed = compressionsStrategy!.compress(serialized);
         this.compressionCallback?.(compressed);
 
-        if (!encodingStrategy) {
-            throw new Error('Encoding strategy is not defined');
-        }
-        const encoded = encodingStrategy.encode(compressed);
+        const encoded = encodingStrategy!.encode(compressed);
         return encoded;
     };
 
     deserializeAtomic = (representation: string): Range[] => {
         const { compressionsStrategy, serializeStrategy, encodingStrategy } = this.options;
-        if (!encodingStrategy) {
-            throw new Error('Encoding strategy is not defined');
-        }
-        const decoded = encodingStrategy.decode(representation);
-        if (!compressionsStrategy) {
-            throw new Error('Compression strategy is not defined');
-        }
-        const decompressed = compressionsStrategy.decompress(decoded);
-        if (!serializeStrategy) {
-            throw new Error('Serialization strategy is not defined');
-        }
-        return serializeStrategy.deserialize(decompressed, this.options.document);
+        const decoded = encodingStrategy!.decode(representation);
+        const decompressed = compressionsStrategy!.decompress(decoded);
+        return serializeStrategy!.deserialize(decompressed, this.options.document);
     };
 
     private createAtomicRanges = (range: Range): Range[] => {
