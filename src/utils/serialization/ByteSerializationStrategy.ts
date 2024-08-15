@@ -35,13 +35,6 @@ export class ByteSerializationStrategy implements SerializationStrategy {
 
             const startNode = findNodeBySelector(start, document);
             const endNode = findNodeBySelector(end, document);
-            // TODO: Consider to remove it? When is this necessary?
-            // if (startNode && startNode.nodeType !== DOM_NODE_TEXT_NODE && startNode.firstChild) {
-            //     startNode = startNode.firstChild;
-            // }
-            // if (endNode && endNode.nodeType !== DOM_NODE_TEXT_NODE && endNode.firstChild) {
-            //     endNode = endNode.firstChild;
-            // }
             if (startNode) {
                 resultRange.setStart(startNode, start.o);
             }

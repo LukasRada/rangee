@@ -23,11 +23,10 @@ test('findNodeBySelector childNode', () => {
         {
             s: 'body>div>h1>span:nth-child(2)',
             o: 0,
-            c: 0,
         },
         dom.window.document,
     );
-    expect(result).toStrictEqual(heading?.childNodes[0]);
+    expect(result).toStrictEqual(heading);
 });
 
 test('findNodeBySelector throws', () => {

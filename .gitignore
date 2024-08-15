@@ -9,3 +9,5 @@ coverage
 /playwright/.cache/
 .DS_Store
 .vscode/settings.json
+e2e/index.js
+
