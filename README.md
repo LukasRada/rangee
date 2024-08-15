@@ -156,7 +156,7 @@ yarn
 yarn dev
 ```
 
----
+or go to: [https://rangee-example.vercel.app/](https://rangee-example.vercel.app/)
 
 ## Supported Browsers
 

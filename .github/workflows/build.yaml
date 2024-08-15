@@ -41,3 +41,26 @@ jobs:
                   name: playwright-report
                   path: playwright-report/
                   retention-days: 30
+    DeployExample:
+        needs: Build
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Go to example directory
+              run: cd examples/nextjs
+            - name: Install node and yarn
+              uses: actions/setup-node@v4
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: 'yarn'
+                  cache-dependency-path: 'yarn.lock'
+            - name: Install Vercel CLI
+              run: npm install --global vercel@latest
+            - name: Pull Vercel environment information
+              run: vercel pull --yes  --cwd ./examples/nextjs --scope=${{ secrets.VERCEL_TEAM_ID }} --token=${{ secrets.VERCEL_TOKEN }}
+            - name: Build project artifacts
+              run: vercel build --cwd ./examples/nextjs --scope=${{ secrets.VERCEL_TEAM_ID }} --token=${{ secrets.VERCEL_TOKEN }}
+            - name: Deploy
+              run: |
+                  vercel deploy --cwd ./examples/nextjs --prebuilt --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+                  vercel alias --cwd ./examples/nextjs --scope=${{ secrets.VERCEL_TEAM_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` rangee-example.vercel.app
