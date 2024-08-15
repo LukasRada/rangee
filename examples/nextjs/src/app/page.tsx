@@ -1,5 +1,5 @@
 "use client";
-import { Rangee } from "rangee"
+import { Rangee, PakoCompressionStrategy, ByteSerializationStrategy } from "rangee"
 
 export default function Home() {
   const handleClick = () => {  
@@ -7,11 +7,12 @@ export default function Home() {
     if (!selection) {
         return;
     }
-    const rangee = new Rangee({ document });
+    const rangee = new Rangee({ document, compressionsStrategy: new PakoCompressionStrategy(), serializeStrategy: new ByteSerializationStrategy() });
     rangee.onCompression((range) => { console.log("Compressed range", range) });
     rangee.onSerialization((range) => { console.log("Serialized range", range) });
     const range = selection.getRangeAt(0);
     const rangeSerialized = rangee.serializeAtomic(range);
+    console.log("Range:", rangeSerialized)
 
     selection.removeAllRanges();
 

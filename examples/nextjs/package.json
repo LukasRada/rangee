@@ -12,7 +12,7 @@
     "react": "^18",
     "react-dom": "^18",
     "next": "14.2.5",
-    "rangee": "1.3.0"
+    "rangee": "2.0.0"
   },
   "devDependencies": {
     "typescript": "^5",
