@@ -1,5 +1,5 @@
 import { JSDOM } from 'jsdom';
-import { ByteSerializationStrategy } from '../../src/utils/serialization/ByteSerializationStrategy'; // Adjust the import path as necessary
+import { ByteSerializationStrategy } from '../../../src/utils/serialization/ByteSerializationStrategy'; // Adjust the import path as necessary
 
 describe('ByteSerializationStrategy', () => {
     let strategy: ByteSerializationStrategy;
@@ -85,5 +85,17 @@ describe('ByteSerializationStrategy', () => {
             const encoded = 'zzzzzz'; // Invalid hex
             expect(() => strategy.decodeSelectorWithCO(encoded)).toThrow('Unknown encoded selector part: zz');
         });
+    });
+
+    it('should encode selector with nth-of-type correctly', () => {
+        const selector = 'div>span:nth-of-type(2)>p:nth-of-type(3)';
+        const offset = 3;
+        const encoded = strategy.encodeSelectorWithCO(selector, offset);
+
+        const decoded = strategy.decodeSelectorWithCO(encoded);
+
+        expect(decoded.s).toBe(selector);
+        expect(decoded.o).toBe(offset);
+        expect(decoded.c).toBe(3);
     });
 });
