@@ -12,6 +12,7 @@ While Rangee focuses solely on serialization and deserialization, it leaves the 
 
 -   [Features](#features)
 -   [Use Cases](#use-cases)
+-   [Implications](#implications)
 -   [Installation](#installation)
 -   [Usage](#usage)
     -   [Basic Example](#basic-example)
@@ -50,6 +51,10 @@ Ideal for applications where users interact with content, like reading apps or e
 
 ---
 
+## Implications
+Make sure HTML DOM stays same for all the time, otherwise Range deserialization is not possible for two different HTML documents.
+
+---
 ## Installation
 
 Install Rangee using Yarn or npm:
