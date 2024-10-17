@@ -52,9 +52,11 @@ Ideal for applications where users interact with content, like reading apps or e
 ---
 
 ## Implications
+
 Make sure HTML DOM stays same for all the time, otherwise Range deserialization is not possible for two different HTML documents.
 
 ---
+
 ## Installation
 
 Install Rangee using Yarn or npm:
@@ -78,7 +80,7 @@ npm install rangee
 Here's a simple example of how to use Rangee to serialize and deserialize a text selection:
 
 ```javascript
-import Rangee from 'rangee';
+import { Rangee } from 'rangee';
 
 const rangee = new Rangee({ document });
 
