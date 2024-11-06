@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "cheerio": "^1.0.0",
-        "happy-dom": "^14.12.3",
+        "happy-dom": "^15.10.2",
         "linkedom": "^0.18.4"
     }
 }
