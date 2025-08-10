@@ -53,7 +53,7 @@ describe('Rangee', () => {
         range.setEnd(second.firstChild!, 5);
         let compressedResult = new Uint8Array();
         rangee.onCompression(compressed => {
-            compressedResult = compressed;
+            compressedResult = new Uint8Array(compressed.buffer as ArrayBuffer);
         });
         let serializedResult = '';
         rangee.onSerialization(serialized => {

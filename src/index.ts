@@ -1,5 +1,7 @@
 export { Rangee } from './Rangee';
 export { ByteSerializationStrategy } from './utils/serialization/ByteSerializationStrategy';
+export { OptimizedByteSerializationStrategy } from './utils/serialization/OptimizedByteSerializationStrategy';
+export { CompressedByteSerializationStrategy } from './utils/serialization/CompressedByteSerializationStrategy';
 export { DefaultSerializationStrategy } from './utils/serialization/DefaultSerializationStrategy';
 export { SerializationStrategy } from './types/SerializationStrategy';
 export { CompressionStrategy } from './types/CompressionStrategy';

@@ -3,6 +3,9 @@ import { JSDOM } from 'jsdom';
 import { Rangee } from '../src/Rangee';
 import { DefaultSerializationStrategy } from '../src/utils/serialization/DefaultSerializationStrategy';
 import { ByteSerializationStrategy } from '../src/utils/serialization/ByteSerializationStrategy';
+import { CompressedByteSerializationStrategy } from '../src/utils/serialization/CompressedByteSerializationStrategy';
+import { OptimizedByteSerializationStrategy } from '../src/utils/serialization/OptimizedByteSerializationStrategy';
+import { UltraOptimizedSerializationStrategy } from '../src/utils/serialization/UltraOptimizedSerializationStrategy';
 import { PakoCompressionStrategy } from '../src/utils/compression/PakoCompressionStrategy';
 import { SerializationStrategy } from '../src/types/SerializationStrategy';
 import { CompressionStrategy } from '../src/types/CompressionStrategy';
@@ -13,13 +16,19 @@ const range = dom.window.document.createRange();
 
 /** From "Complex HTML Page" to "Ordered list item 3" */
 const start = dom.window.document.body.querySelector('h1')!;
-const end = dom.window.document.body.querySelector('body>div>main>section:nth-of-type(3)>ol>li:nth-of-type(3)')!;
+const end = dom.window.document.body.querySelector('div>main>section:nth-of-type(3)>ol>li:nth-of-type(3)')!;
 range.setStart(start.firstChild!, 3);
 range.setEnd(end.firstChild!, 11);
 const serializeBench = new Bench();
 const deserializeBench = new Bench();
 
-const serializationStrategies: SerializationStrategy[] = [new DefaultSerializationStrategy(), new ByteSerializationStrategy()];
+const serializationStrategies: SerializationStrategy[] = [
+    new DefaultSerializationStrategy(),
+    new ByteSerializationStrategy(),
+    // new CompressedByteSerializationStrategy(),
+    new OptimizedByteSerializationStrategy(),
+    new UltraOptimizedSerializationStrategy(),
+];
 
 const compressionStrategies: CompressionStrategy[] = [new PakoCompressionStrategy(), new DefaultCompressionStrategy()];
 
