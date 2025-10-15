@@ -131,6 +131,18 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.23.0.tgz#db44a6a08520b5f25bbe409f34a59f2d4bcc7ced"
   integrity sha512-Arm+WgUFLUATuoxCJcahGuk6Yj9Pzxd6l11Zb/2aAuv5kWWvvfhLFo2fni4uSK5vzlUdCGZ/BdV5tH8klj8p8g==
 
+"@types/node@^20.0.0":
+  version "20.19.21"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.19.21.tgz#6e5378e04993c40395473b13baf94a09875157b8"
+  integrity sha512-CsGG2P3I5y48RPMfprQGfy4JPRZ6csfC3ltBZSRItG3ngggmNY/qs2uZKp4p9VbrpqNNSMzUZNFZKzgOGnd/VA==
+  dependencies:
+    undici-types "~6.21.0"
+
+"@types/whatwg-mimetype@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@types/whatwg-mimetype/-/whatwg-mimetype-3.0.2.tgz#e5e06dcd3e92d4e622ef0129637707d66c28d6a4"
+  integrity sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==
+
 agent-base@^7.0.2, agent-base@^7.1.0:
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-7.1.1.tgz#bdbded7dfb096b751a2a087eeeb9664725b2e317"
@@ -346,13 +358,13 @@ get-tsconfig@^4.7.5:
   dependencies:
     resolve-pkg-maps "^1.0.0"
 
-happy-dom@^15.10.2:
-  version "15.10.2"
-  resolved "https://registry.yarnpkg.com/happy-dom/-/happy-dom-15.10.2.tgz#14ae6652d1a80d2611e3f5832cb61ab5e2d1b539"
-  integrity sha512-NbA5XrSovenJIIcfixCREX3ZnV7yHP4phhbfuxxf4CPn+LZpz/jIM9EqJ2DrPwgVDSMoAKH3pZwQvkbsSiCrUw==
+happy-dom@^20.0.2:
+  version "20.0.2"
+  resolved "https://registry.yarnpkg.com/happy-dom/-/happy-dom-20.0.2.tgz#da676a1e3d0742aff8ba4789db90445842538808"
+  integrity sha512-pYOyu624+6HDbY+qkjILpQGnpvZOusItCk+rvF5/V+6NkcgTKnbOldpIy22tBnxoaLtlM9nXgoqAcW29/B7CIw==
   dependencies:
-    entities "^4.5.0"
-    webidl-conversions "^7.0.0"
+    "@types/node" "^20.0.0"
+    "@types/whatwg-mimetype" "^3.0.2"
     whatwg-mimetype "^3.0.0"
 
 html-encoding-sniffer@^4.0.0:
@@ -587,6 +599,11 @@ uhyphen@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/uhyphen/-/uhyphen-0.2.0.tgz#8fdf0623314486e020a3c00ee5cc7a12fe722b81"
   integrity sha512-qz3o9CHXmJJPGBdqzab7qAYuW8kQGKNEuoHFYrBwV6hWIMcpAmxDLXojcHfFr9US1Pe6zUswEIJIbLI610fuqA==
+
+undici-types@~6.21.0:
+  version "6.21.0"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
+  integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
 
 undici@^6.19.5:
   version "6.21.1"
